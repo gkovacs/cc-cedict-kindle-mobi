@@ -14,7 +14,7 @@ for line in dict_lines
   simp = split_by_space[1]
   pinyin_and_defs = split_by_space[2 to].join(' ').trim()
   pinyin = pinyin_and_defs.split(']')[0].substr(1).trim()
-  defs = pinyin_and_defs.split(']')[1 to].join(' ').trim().split('/').filter(-> it.length > 0).join("\\n")
+  defs = pinyin_and_defs.split(']')[1 to].join(']').trim().split('/').filter(-> it.length > 0).join("\\n")
   if trad != simp
     if not trad_to_simp[trad]?
       trad_to_simp[trad] = simp

@@ -1,4 +1,4 @@
-# CC-CEDICT Chinese-English Dictionary for Kindle
+# CC-CEDICT Chinese-English Dictionary for Kindle (mobi format)
 
 ## About
 

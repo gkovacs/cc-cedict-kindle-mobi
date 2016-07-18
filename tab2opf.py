@@ -154,7 +154,7 @@ OPFTEMPLATEHEAD1 = """<?xml version="1.0"?><!DOCTYPE package SYSTEM "oeb1.ent">
 """
 OPFTEMPLATEHEADNOUTF = """		<output encoding="Windows-1252" flatten-dynamic-dir="yes"/>"""
 OPFTEMPLATEHEAD2 = """
-		<DictionaryInLanguage>en-us</DictionaryInLanguage>
+		<DictionaryInLanguage>zh-cn</DictionaryInLanguage>
 		<DictionaryOutLanguage>en-us</DictionaryOutLanguage>
 	</x-metadata>
 </metadata>
@@ -213,7 +213,7 @@ i = 0
 to = False
 
 for r in fr.xreadlines():
-   
+
     if i % 10000 == 0:
         if to:
             to.write("""
@@ -244,10 +244,7 @@ for r in fr.xreadlines():
     dtstrip = normalizeUnicode( dt )
     dd = dd.replace("\\\\","\\").replace("\\n","<br/>\n")
     to.write("""      <idx:entry name="word" scriptable="yes">
-        <h2>
-          <idx:orth>%s</idx:orth><idx:key key="%s">
-        </h2>
-        %s
+          <idx:orth>%s</idx:orth><idx:key key="%s"> %s
       </idx:entry>
       <mbp:pagebreak/>
 """ % (dt, dtstrip, dd))
@@ -264,7 +261,7 @@ fr.close()
 lineno = i - 1
 
 to = open("%s.opf" % name, 'w')
-to.write(OPFTEMPLATEHEAD1 % (name, name))
+to.write(OPFTEMPLATEHEAD1 % (name, 'CEDICT Chinese-English'))
 if not UTFINDEX:
     to.write(OPFTEMPLATEHEADNOUTF)
 to.write(OPFTEMPLATEHEAD2)

@@ -18,3 +18,16 @@ lsc to_dict.ls
 python tab2opf.py -utf dictionary.txt
 kindlegen dictionary.opf
 ```
+
+# Author
+
+[Geza Kovacs](https://github.com/gkovacs)
+
+# License
+
+MIT
+
+# Related
+
+For version with zhuyin and jyutping (cantonese), see https://github.com/gkovacs/cantodict-kindle-mobi
+

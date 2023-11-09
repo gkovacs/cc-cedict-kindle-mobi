@@ -45,7 +45,6 @@ import os
 
 from unicodedata import normalize, decomposition, combining
 import string
-from exceptions import UnicodeEncodeError
 
 # Hand-made table from PloneTool.py
 mapping_custom_1 =  {
@@ -93,48 +92,88 @@ whitespace = ''.join([c for c in string.whitespace if ord(c) < 128])
 allowed = string.ascii_letters + string.digits + string.punctuation + whitespace
 
 def normalizeUnicode(text, encoding='humanascii'):
-    """
-    This method is used for normalization of unicode characters to the base ASCII
-    letters. Output is ASCII encoded string (or char) with only ASCII letters,
-    digits, punctuation and whitespace characters. Case is preserved.
-    """
-    unicodeinput = True
-    if not isinstance(text, unicode):
-        text = unicode(text, 'utf-8')
-        unicodeinput = False
+   """
+   This method is used for normalization of unicode characters to the base ASCII
+   letters. Output is ASCII encoded string (or char) with only ASCII letters,
+   digits, punctuation and whitespace characters. Case is preserved.
+   """
+   if not isinstance(text, str):
+       text = str(text, 'utf-8')       
 
-    res = ''
-    global allowed
-    if encoding == 'humanascii':
-        enc = 'ascii'
-    else:
-        enc = encoding
-    for ch in text:
-        if (encoding == 'humanascii') and (ch in allowed):
-            # ASCII chars, digits etc. stay untouched
-            res += ch
-            continue
-        else:
-            try:
-                ch.encode(enc,'strict')
-                res += ch
-            except UnicodeEncodeError:
-                ordinal = ord(ch)
-                if mapping.has_key(ordinal):
-                    # try to apply custom mappings
-                    res += mapping.get(ordinal)
-                elif decomposition(ch) or len(normalize('NFKD',ch)) > 1:
-                    normalized = filter(lambda i: not combining(i), normalize('NFKD', ch)).strip()
-                    # normalized string may contain non-letter chars too. Remove them
-                    # normalized string may result to  more than one char
-                    res += ''.join([c for c in normalized if c in allowed])
-                else:
-                    # hex string instead of unknown char
-                    res += "%x" % ordinal
-    if unicodeinput:
-        return res
-    else:
-        return res.encode('utf-8')
+   res = ''
+   global allowed
+   if encoding == 'humanascii':
+       enc = 'ascii'
+   else:
+       enc = encoding
+   for ch in text:
+       if (encoding == 'humanascii') and (ch in allowed):
+           # ASCII chars, digits etc. stay untouched
+           res += ch
+           continue
+       else:
+           try:
+               ch.encode(enc,'strict')
+               res += ch
+           except:
+               ordinal = ord(ch)
+               if ordinal in mapping:
+                   # try to apply custom mappings
+                   res += mapping.get(ordinal)
+               elif decomposition(ch) or len(normalize('NFKD',ch)) > 1:
+                   normalized = ''.join(filter(lambda i: not combining(i), normalize('NFKD', ch)))
+                   # normalized string may contain non-letter chars too. Remove them
+                   # normalized string may result to more than one char
+                   res += ''.join([c for c in normalized if c in allowed])
+               else:
+                   # hex string instead of unknown char
+                   res += "%x" % ordinal
+   return res
+
+
+# def normalizeUnicode(text, encoding='humanascii'):
+#     """
+#     This method is used for normalization of unicode characters to the base ASCII
+#     letters. Output is ASCII encoded string (or char) with only ASCII letters,
+#     digits, punctuation and whitespace characters. Case is preserved.
+#     """
+#     unicodeinput = True
+#     if not isinstance(text, str):
+#         text = str(text, 'utf-8')        
+#         unicodeinput = False
+
+#     res = ''
+#     global allowed
+#     if encoding == 'humanascii':
+#         enc = 'ascii'
+#     else:
+#         enc = encoding
+#     for ch in text:
+#         if (encoding == 'humanascii') and (ch in allowed):
+#             # ASCII chars, digits etc. stay untouched
+#             res += ch
+#             continue
+#         else:
+#             try:
+#                 ch.encode(enc,'strict')
+#                 res += ch
+#             except:
+#                 ordinal = ord(ch)
+#                 if ordinal in mapping:
+#                     # try to apply custom mappings
+#                     res += mapping.get(ordinal)
+#                 elif decomposition(ch) or len(normalize('NFKD',ch)) > 1:
+#                     normalized = filter(lambda i: not combining(i), normalize('NFKD', ch)).strip()
+#                     # normalized string may contain non-letter chars too. Remove them
+#                     # normalized string may result to  more than one char
+#                     res += ''.join([c for c in normalized if c in allowed])
+#                 else:
+#                     # hex string instead of unknown char
+#                     res += "%x" % ordinal
+#     if unicodeinput:
+#         return res
+#     else:
+#         return res.encode('utf-8')
 
 OPFTEMPLATEHEAD1 = """<?xml version="1.0"?><!DOCTYPE package SYSTEM "oeb1.ent">
 
@@ -196,24 +235,22 @@ if len(sys.argv) > 1:
     else:
         FILENAME = sys.argv[1]
 else:
-    print "tab2opf (Stardict->MobiPocket)"
-    print "------------------------------"
-    print "Version: %s" % VERSION
-    print "Copyright (C) 2007 - Klokan Petr Pridal"
-    print
-    print "Usage: python tab2opf.py [-utf] DICTIONARY.tab"
-    print
-    print "ERROR: You have to specify a .tab file"
+    print ("tab2opf (Stardict->MobiPocket)")
+    print ("------------------------------")
+    print ("Version: %s" % VERSION)
+    print ("Copyright (C) 2007 - Klokan Petr Pridal")
+    print ("Usage: python tab2opf.py [-utf] DICTIONARY.tab")
+    print ("ERROR: You have to specify a .tab file")
     sys.exit(1)
 
-fr = open(FILENAME,'rb')
+fr = open(FILENAME,'r', encoding='utf-8')
 name = os.path.splitext(os.path.basename(FILENAME))[0]
 
 i = 0
 to = False
 
-for r in fr.xreadlines():
-
+for r in fr.read().splitlines():
+    
     if i % 10000 == 0:
         if to:
             to.write("""
@@ -248,7 +285,7 @@ for r in fr.xreadlines():
       </idx:entry>
       <mbp:pagebreak/>
 """ % (dt, dtstrip, dd))
-    print dt
+    print(dt)
     i += 1
 
 to.write("""
@@ -265,9 +302,9 @@ to.write(OPFTEMPLATEHEAD1 % (name, 'CEDICT Chinese-English'))
 if not UTFINDEX:
     to.write(OPFTEMPLATEHEADNOUTF)
 to.write(OPFTEMPLATEHEAD2)
-for i in range(0,(lineno/10000)+1):
+for i in range(0,int(lineno/10000)+1):
     to.write(OPFTEMPLATELINE % (i, name, i))
 to.write(OPFTEMPLATEMIDDLE)
-for i in range(0,(lineno/10000)+1):
+for i in range(0,int(lineno/10000)+1):
     to.write(OPFTEMPLATELINEREF % i)
 to.write(OPFTEMPLATEEND)
